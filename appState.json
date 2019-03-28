@@ -1,0 +1,148 @@
+{
+  "EDITOR_STATE": {
+    "allProjectFiles": {
+      "b3a7d8c9-b7ae-419d-be54-6d49b43b47d7": {
+        "id": "b3a7d8c9-b7ae-419d-be54-6d49b43b47d7",
+        "parent": null,
+        "name": "S3Trigger",
+        "type": "DIRECTORY",
+        "isDirectory": true,
+        "children": [
+          "2dc8cac9-2f5a-4ef6-9874-2ab166556294",
+          "5721c793-921d-4737-9637-01f84b8828ee"
+        ],
+        "isRemovable": false,
+        "filePath": "S3Trigger"
+      },
+      "2dc8cac9-2f5a-4ef6-9874-2ab166556294": {
+        "id": "2dc8cac9-2f5a-4ef6-9874-2ab166556294",
+        "parent": "b3a7d8c9-b7ae-419d-be54-6d49b43b47d7",
+        "name": "lambda.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "S3Trigger/lambda.js",
+        "code": "let AWS = require('aws-sdk');\nconst s3 = new AWS.S3();\n\nexports.handler = function (event, context, callback) {\n    s3.putObject({\n        \"Body\": \"Test object content\",\n        \"Bucket\": \"cloud9-ktest\",\n        \"Key\": \"Test object key\"\n    })\n        .promise()\n        .then(data => {\n            console.log(data);           // successful response\n            /*\n            data = {\n                ETag: \"\\\\\"6805f2cfc46c0f04559748bb039d69ae\\\\\"\", \n                VersionId: \"pSKidl4pHBiNwukdbcPXAIs.sshFFOc0\"\n            }\n            */\n        })\n        .catch(err => {\n            console.log(err, err.stack); // an error occurred\n        });\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "handler": "handler",
+          "timeout": 60,
+          "memory": 128,
+          "layers": []
+        },
+        "testCases": {
+          "5e7ecef6-9444-4892-80fd-13744831eafe": {
+            "id": "5e7ecef6-9444-4892-80fd-13744831eafe",
+            "name": "Unnamed event",
+            "functionId": "2dc8cac9-2f5a-4ef6-9874-2ab166556294",
+            "event": "{\n    \"key1\": \"value1\",\n    \"key2\": \"value2\",\n    \"key3\": \"value3\"\n}"
+          }
+        }
+      },
+      "5721c793-921d-4737-9637-01f84b8828ee": {
+        "id": "5721c793-921d-4737-9637-01f84b8828ee",
+        "parent": "b3a7d8c9-b7ae-419d-be54-6d49b43b47d7",
+        "name": "publishSNSMessage.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "S3Trigger/publishSNSMessage.js",
+        "code": "let AWS = require('aws-sdk');\nconst sns = new AWS.SNS();\n\nexports.handler = function (event, context, callback) {\n    event.Records.forEach((record) => {\n        console.log('Bucket record: ', JSON.stringify(record, null, 2));\n        if (record.eventName == 'ObjectCreated:Put') {\n            sns.publish({\n                Message: 'Test trigger',\n                Subject: 'Test',\n                MessageAttributes: {},\n                MessageStructure: 'String',\n                TopicArn: 'arn:aws:sns:us-east-1:318300609668:dynamodb'\n            }).promise()\n                .then(data => {\n                    // your code goes here\n                })\n                .catch(err => {\n                    // error handling goes here\n                });\n        }\n    });\n    callback(null, { \"message\": \"Successfully executed\" });\n};",
+        "triggers": [
+          {
+            "resourceName": "s3cloud9Ktest",
+            "config": {
+              "type": "s3:ObjectCreated:Put",
+              "keyPrefix": "",
+              "keySuffix": ""
+            }
+          }
+        ],
+        "config": {
+          "runtime": "nodejs8.10",
+          "handler": "handler",
+          "timeout": 60,
+          "memory": 128,
+          "layers": []
+        }
+      }
+    },
+    "deletedFiles": [],
+    "rootNode": "b3a7d8c9-b7ae-419d-be54-6d49b43b47d7",
+    "openFiles": [
+      "2dc8cac9-2f5a-4ef6-9874-2ab166556294",
+      "5721c793-921d-4737-9637-01f84b8828ee"
+    ],
+    "currentFileId": "2dc8cac9-2f5a-4ef6-9874-2ab166556294",
+    "resources": {
+      "s3cloud9Ktest": {
+        "name": "s3cloud9Ktest",
+        "type": "S3",
+        "config": {
+          "mode": 1,
+          "bucket": {
+            "region": "us-east-1",
+            "name": "cloud9-ktest"
+          }
+        },
+        "globallyEditable": false
+      },
+      "snsusEast1dynamodb": {
+        "name": "snsusEast1dynamodb",
+        "type": "SNS",
+        "config": {
+          "topicMode": 1,
+          "topicName": "dynamodb",
+          "topicArn": "arn:aws:sns:us-east-1:318300609668:dynamodb",
+          "topicRegion": "us-east-1",
+          "snsType": 0,
+          "subscriptions": []
+        },
+        "globallyEditable": true
+      }
+    },
+    "customTemplate": {
+      "dialect": null,
+      "definitions": {}
+    },
+    "envVariables": [
+      {
+        "lambdaId": "all",
+        "varKey": "SIGMA_AWS_ACC_ID",
+        "varValue": null,
+        "shouldPersist": false,
+        "displayOnly": false,
+        "editable": false
+      }
+    ],
+    "packageJSON": {
+      "dependencies": {
+        "aws-sdk": {
+          "name": "aws-sdk",
+          "version": "2.176.0",
+          "dev": true,
+          "notRemovable": false
+        }
+      }
+    }
+  },
+  "PROJECT_META": {
+    "projectName": "S3Trigger",
+    "projectDescription": "Test S3 as a trigger",
+    "projectVersion": "1.0.0",
+    "projectRegion": "us-east-1",
+    "platform": "AWS",
+    "platformRegions": {},
+    "lastSave": 1553762241578
+  },
+  "VCS_STATE": {
+    "provider": "GitHub",
+    "repo": {
+      "name": "s-3-trigger",
+      "url": "https://github.com/Kumudikatest/S3trigger"
+    }
+  }
+}
